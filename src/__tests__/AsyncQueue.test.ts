@@ -154,6 +154,28 @@ describe('AsyncQueue', () => {
       expect(results).toEqual(['hey', 'ho', "let's", 'go']);
     });
   });
+
+  describe('Initialize with an iterator', () => {
+    it('should iterate through all enqueued values', async () => {
+      const q = new AsyncQueue<string>(
+        (async function*() {
+          yield 'hey';
+          yield 'ho';
+          await wait(10);
+          yield "let's";
+          yield 'go';
+        })(),
+      );
+
+      const results: string[] = [];
+
+      for await (const value of q.iterator()) {
+        results.push(value);
+      }
+
+      expect(results).toEqual(['hey', 'ho', "let's", 'go']);
+    });
+  });
 });
 
 const wait = (millis: number = 0) =>

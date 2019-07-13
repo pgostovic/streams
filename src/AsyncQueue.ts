@@ -8,8 +8,17 @@ export class AsyncQueue<T> {
   private resolverQueue: Array<IResolver<T | undefined>> = [];
   private waitForEnqueue: IResolver<void> = newResolver<void>();
 
-  constructor() {
+  constructor(iter?: AsyncIterableIterator<T>) {
     const that = this;
+
+    if (iter) {
+      (async () => {
+        for await (const val of iter) {
+          this.enqueue(val);
+        }
+        this.flush();
+      })();
+    }
 
     this.iter = async function*() {
       while (true) {
