@@ -2,8 +2,8 @@
 import { AsyncQueue, FLUSH, newQueueGenerator } from './AsyncQueue';
 
 export enum Type {
-  Value = 'v',
-  End = 'e',
+  Value = 'value',
+  End = 'end',
   InternalError = 'err',
   Anomaly = 'an',
 }
