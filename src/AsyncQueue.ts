@@ -4,71 +4,79 @@
  */
 
 export class AsyncQueue<T> {
-  private iter: () => AsyncIterableIterator<T>;
+  private gen = newQueueGenerator(this);
   private resolverQueue: Array<IResolver<T | undefined>> = [];
   private waitForEnqueue: IResolver<void> = newResolver<void>();
 
   constructor(iter?: AsyncIterableIterator<T>) {
-    const that = this;
-
     if (iter) {
       (async () => {
         for await (const val of iter) {
           this.enqueue(val);
         }
+
+        // const isDone = false;
+        // while (!isDone) {
+        //   const next = await iter.next();
+
+        // }
+
         this.flush();
       })();
     }
-
-    this.iter = async function*() {
-      while (true) {
-        const value = await that.dequeueValue();
-        if (!value) {
-          break;
-        }
-        yield value;
-      }
-    };
   }
 
   public enqueue(value: T) {
-    this.enqueueValue(value);
-  }
-
-  public async dequeue(): Promise<T> {
-    const value = await this.dequeueValue();
-    if (value) {
-      return value;
-    }
-    throw new Error('hello');
+    this.enqueueVal(value);
   }
 
   public flush() {
-    this.enqueueValue(undefined);
+    this.enqueueVal(undefined);
   }
 
   public iterator(): AsyncIterableIterator<T> {
-    return this.iter();
+    return this.gen();
   }
 
-  private enqueueValue(value?: T) {
+  public async dequeue(): Promise<T> {
+    const resolver = this.resolverQueue.shift();
+    if (resolver) {
+      const value = await resolver.promise;
+      if (value) {
+        return value;
+      }
+      throw FLUSH;
+    } else {
+      await this.waitForEnqueue.promise;
+      return this.dequeue();
+    }
+  }
+
+  private enqueueVal(value?: T) {
     this.waitForEnqueue.resolve();
     this.waitForEnqueue = newResolver<void>();
     const resolver = newResolver<T | undefined>();
     this.resolverQueue.push(resolver);
     resolver.resolve(value);
   }
-
-  private async dequeueValue(): Promise<T | undefined> {
-    const resolver = this.resolverQueue.shift();
-    if (resolver) {
-      return await resolver.promise;
-    } else {
-      await this.waitForEnqueue.promise;
-      return this.dequeue();
-    }
-  }
 }
+
+export const FLUSH = new Error('flush');
+
+export const newQueueGenerator = <T>(q: { dequeue: () => Promise<T> }) =>
+  async function*() {
+    while (true) {
+      try {
+        yield await q.dequeue();
+      } catch (err) {
+        if (err === FLUSH) {
+          break;
+        } else {
+          throw err;
+        }
+      }
+    }
+  };
 
 const newResolver = <R>(): IResolver<R> => {
   let r: ((value: R) => void) | undefined;

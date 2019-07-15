@@ -102,6 +102,13 @@ describe('AsyncQueue', () => {
 
       await Promise.all([
         (async () => {
+          q.enqueue('hey');
+          q.enqueue('ho');
+          q.enqueue("let's");
+          q.enqueue('go');
+          q.flush();
+        })(),
+        (async () => {
           results.push(await q.dequeue());
           results.push(await q.dequeue());
           results.push(await q.dequeue());
@@ -113,13 +120,6 @@ describe('AsyncQueue', () => {
           } catch (err) {
             expect(err).toBeInstanceOf(Error);
           }
-        })(),
-        (async () => {
-          q.enqueue('hey');
-          q.enqueue('ho');
-          q.enqueue("let's");
-          q.enqueue('go');
-          q.flush();
         })(),
       ]);
 
@@ -135,19 +135,19 @@ describe('AsyncQueue', () => {
 
       await Promise.all([
         (async () => {
+          q.enqueue('hey');
+          q.enqueue('ho');
+          q.enqueue("let's");
+          q.enqueue('go');
+          q.flush();
+        })(),
+        (async () => {
           results.push(await q.dequeue());
           results.push(await q.dequeue());
 
           for await (const value of q.iterator()) {
             results.push(value);
           }
-        })(),
-        (async () => {
-          q.enqueue('hey');
-          q.enqueue('ho');
-          q.enqueue("let's");
-          q.enqueue('go');
-          q.flush();
         })(),
       ]);
 
