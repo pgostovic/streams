@@ -1,4 +1,4 @@
-import { Anomaly, InputResponseQueue, Type } from '..';
+import { Anomaly, IMessage, InputResponseQueue, Type } from '..';
 
 describe('InputResponseQueue', () => {
   describe('Enqueue a single, final message', () => {
@@ -99,6 +99,28 @@ describe('InputResponseQueue', () => {
       ]);
 
       expect(results).toEqual([]);
+    });
+  });
+
+  describe('Initialize with an iterator', () => {
+    it('should iterate through all enqueued values', async () => {
+      const q = new InputResponseQueue<string>(
+        (async function*() {
+          yield { type: Type.Value, value: 'hey' } as IMessage<string>;
+          yield { type: Type.Value, value: 'ho' } as IMessage<string>;
+          yield { type: Type.Value, value: "let's" } as IMessage<string>;
+          yield { type: Type.Value, value: 'go' } as IMessage<string>;
+          yield { type: Type.End } as IMessage<string>;
+        })(),
+      );
+
+      const results: string[] = [];
+
+      for await (const value of q.iterator()) {
+        results.push(value);
+      }
+
+      expect(results).toEqual(['hey', 'ho', "let's", 'go']);
     });
   });
 });

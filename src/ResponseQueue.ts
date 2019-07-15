@@ -39,6 +39,16 @@ export class InputResponseQueue<T> {
   private q = new AsyncQueue<IMessage<T>>();
   private gen = newQueueGenerator<T>(this);
 
+  constructor(iter?: AsyncIterableIterator<IMessage<T>>) {
+    if (iter) {
+      (async () => {
+        for await (const val of iter) {
+          this.enqueue(val);
+        }
+      })();
+    }
+  }
+
   public iterator() {
     return this.gen();
   }
