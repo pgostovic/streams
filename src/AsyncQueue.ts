@@ -14,13 +14,6 @@ export class AsyncQueue<T> {
         for await (const val of iter) {
           this.enqueue(val);
         }
-
-        // const isDone = false;
-        // while (!isDone) {
-        //   const next = await iter.next();
-
-        // }
-
         this.flush();
       })();
     }
