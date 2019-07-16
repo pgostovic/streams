@@ -5,6 +5,7 @@
 
 export class AsyncQueue<T> {
   public maxSize = 0;
+  public maxWaitTime = 0;
   private gen = newQueueGenerator(this);
   private resolverQueue: Array<IResolver<T | undefined>> = [];
   private waitForEnqueue: IResolver<void> = newResolver<void>();
@@ -41,7 +42,19 @@ export class AsyncQueue<T> {
       }
       throw FLUSH;
     } else {
+      const pid =
+        this.maxWaitTime > 0
+          ? setTimeout(() => {
+              this.waitForEnqueue.reject(new Error(`Timed out waiting for enqueue (${this.maxWaitTime}ms)`));
+            }, this.maxWaitTime)
+          : 0;
+
       await this.waitForEnqueue.promise;
+
+      if (pid !== 0) {
+        clearTimeout(pid);
+      }
+
       return this.dequeue();
     }
   }

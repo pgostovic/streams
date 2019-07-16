@@ -10,17 +10,17 @@ describe('AsyncQueue', () => {
 
         await Promise.all([
           (async () => {
-            await wait(10);
-            for await (const value of q.iterator()) {
-              results.push(value);
-            }
-          })(),
-          (async () => {
             q.enqueue('hey');
             q.enqueue('ho');
             q.enqueue("let's");
             q.enqueue('go');
             q.flush();
+          })(),
+          (async () => {
+            await wait(10);
+            for await (const value of q.iterator()) {
+              results.push(value);
+            }
           })(),
         ]);
 
@@ -36,17 +36,17 @@ describe('AsyncQueue', () => {
 
         await Promise.all([
           (async () => {
-            for await (const value of q.iterator()) {
-              results.push(value);
-            }
-          })(),
-          (async () => {
             await wait(10);
             q.enqueue('hey');
             q.enqueue('ho');
             q.enqueue("let's");
             q.enqueue('go');
             q.flush();
+          })(),
+          (async () => {
+            for await (const value of q.iterator()) {
+              results.push(value);
+            }
           })(),
         ]);
 
@@ -63,15 +63,6 @@ describe('AsyncQueue', () => {
 
         await Promise.all([
           (async () => {
-            for await (const value of is.iterator()) {
-              results1.push(value);
-            }
-
-            for await (const value of is.iterator()) {
-              results2.push(value);
-            }
-          })(),
-          (async () => {
             is.enqueue('all');
             is.enqueue('work');
             is.enqueue('and');
@@ -85,6 +76,15 @@ describe('AsyncQueue', () => {
             is.enqueue('dull');
             is.enqueue('boy');
             is.flush();
+          })(),
+          (async () => {
+            for await (const value of is.iterator()) {
+              results1.push(value);
+            }
+
+            for await (const value of is.iterator()) {
+              results2.push(value);
+            }
           })(),
         ]);
 
@@ -193,6 +193,39 @@ describe('AsyncQueue', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }
+    });
+  });
+
+  describe('With maxWaitTime set', () => {
+    it('should throw when enqueue wait exceeds maxWaitTime', async () => {
+      const q = new AsyncQueue<string>();
+      q.maxWaitTime = 10;
+
+      const results: string[] = [];
+
+      await Promise.all([
+        (async () => {
+          q.enqueue('hey');
+          await wait(5);
+          q.enqueue('ho');
+          await wait(20);
+          q.enqueue("let's");
+          q.enqueue('go');
+          q.flush();
+        })(),
+        (async () => {
+          try {
+            for await (const value of q.iterator()) {
+              results.push(value);
+            }
+            fail('Should have thrown');
+          } catch (err) {
+            expect(err).toBeInstanceOf(Error);
+          }
+        })(),
+      ]);
+
+      expect(results).toEqual(['hey', 'ho']);
     });
   });
 });
