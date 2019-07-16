@@ -9,7 +9,7 @@ describe('InputResponseQueue', () => {
 
       await Promise.all([
         (async () => {
-          q.enqueue({ type: Type.Value, value: 'hello' });
+          q.enqueue({ type: Type.Value, payload: 'hello' });
           q.enqueue({ type: Type.End });
         })(),
         (async () => {
@@ -29,7 +29,7 @@ describe('InputResponseQueue', () => {
 
       await Promise.all([
         (async () => {
-          q.enqueue({ type: Type.Value, value: 'hello' });
+          q.enqueue({ type: Type.Value, payload: 'hello' });
           q.enqueue({ type: Type.End });
         })(),
         (async () => {
@@ -48,10 +48,10 @@ describe('InputResponseQueue', () => {
 
       await Promise.all([
         (async () => {
-          q.enqueue({ type: Type.Value, value: 'hey' });
-          q.enqueue({ type: Type.Value, value: 'ho' });
-          q.enqueue({ type: Type.Value, value: "let's" });
-          q.enqueue({ type: Type.Value, value: 'go' });
+          q.enqueue({ type: Type.Value, payload: 'hey' });
+          q.enqueue({ type: Type.Value, payload: 'ho' });
+          q.enqueue({ type: Type.Value, payload: "let's" });
+          q.enqueue({ type: Type.Value, payload: 'go' });
           q.enqueue({ type: Type.End });
         })(),
         (async () => {
@@ -73,7 +73,7 @@ describe('InputResponseQueue', () => {
 
       await Promise.all([
         (async () => {
-          q.enqueue({ type: Type.InternalError, value: { message: 'The Error' } });
+          q.enqueue({ type: Type.InternalError, payload: { message: 'The Error' } });
         })(),
         (async () => {
           try {
@@ -100,7 +100,7 @@ describe('InputResponseQueue', () => {
 
       await Promise.all([
         (async () => {
-          q.enqueue({ type: Type.Anomaly, value: { message: 'The Anomaly' } });
+          q.enqueue({ type: Type.Anomaly, payload: { message: 'The Anomaly' } });
         })(),
         (async () => {
           try {
@@ -123,10 +123,10 @@ describe('InputResponseQueue', () => {
     it('should iterate through all enqueued values', async () => {
       const q = new InputResponseQueue<string>(
         (async function*() {
-          yield { type: Type.Value, value: 'hey' } as IMessage<string>;
-          yield { type: Type.Value, value: 'ho' } as IMessage<string>;
-          yield { type: Type.Value, value: "let's" } as IMessage<string>;
-          yield { type: Type.Value, value: 'go' } as IMessage<string>;
+          yield { type: Type.Value, payload: 'hey' } as IMessage<string>;
+          yield { type: Type.Value, payload: 'ho' } as IMessage<string>;
+          yield { type: Type.Value, payload: "let's" } as IMessage<string>;
+          yield { type: Type.Value, payload: 'go' } as IMessage<string>;
           yield { type: Type.End } as IMessage<string>;
         })(),
       );
@@ -148,13 +148,13 @@ describe('InputResponseQueue', () => {
 
       expect(q.maxSize).toBe(4);
 
-      q.enqueue({ type: Type.Value, value: 'hey' });
-      q.enqueue({ type: Type.Value, value: 'ho' });
-      q.enqueue({ type: Type.Value, value: "let's" });
-      q.enqueue({ type: Type.Value, value: 'go' });
+      q.enqueue({ type: Type.Value, payload: 'hey' });
+      q.enqueue({ type: Type.Value, payload: 'ho' });
+      q.enqueue({ type: Type.Value, payload: "let's" });
+      q.enqueue({ type: Type.Value, payload: 'go' });
 
       try {
-        q.enqueue({ type: Type.Value, value: 'too far' });
+        q.enqueue({ type: Type.Value, payload: 'too far' });
         fail('Should have thrown');
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
@@ -166,10 +166,10 @@ describe('InputResponseQueue', () => {
     it('should return an array of all queued values', async () => {
       const q = new InputResponseQueue<string>(
         (async function*() {
-          yield { type: Type.Value, value: 'hey' } as IMessage<string>;
-          yield { type: Type.Value, value: 'ho' } as IMessage<string>;
-          yield { type: Type.Value, value: "let's" } as IMessage<string>;
-          yield { type: Type.Value, value: 'go' } as IMessage<string>;
+          yield { type: Type.Value, payload: 'hey' } as IMessage<string>;
+          yield { type: Type.Value, payload: 'ho' } as IMessage<string>;
+          yield { type: Type.Value, payload: "let's" } as IMessage<string>;
+          yield { type: Type.Value, payload: 'go' } as IMessage<string>;
           yield { type: Type.End } as IMessage<string>;
         })(),
       );

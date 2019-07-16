@@ -19,7 +19,7 @@ describe('OutputResponseQueue', () => {
         })(),
       ]);
 
-      expect(results).toEqual([{ type: Type.Value, value: 'hello' }, { type: Type.End }]);
+      expect(results).toEqual([{ type: Type.Value, payload: 'hello' }, { type: Type.End }]);
     });
   });
 
@@ -45,10 +45,10 @@ describe('OutputResponseQueue', () => {
       ]);
 
       expect(results).toEqual([
-        { type: Type.Value, value: 'hey' },
-        { type: Type.Value, value: 'ho' },
-        { type: Type.Value, value: "let's" },
-        { type: Type.Value, value: 'go' },
+        { type: Type.Value, payload: 'hey' },
+        { type: Type.Value, payload: 'ho' },
+        { type: Type.Value, payload: "let's" },
+        { type: Type.Value, payload: 'go' },
         { type: Type.End },
       ]);
     });
@@ -72,10 +72,10 @@ describe('OutputResponseQueue', () => {
       }
 
       expect(results).toEqual([
-        { type: Type.Value, value: 'hey' },
-        { type: Type.Value, value: 'ho' },
-        { type: Type.Value, value: "let's" },
-        { type: Type.Value, value: 'go' },
+        { type: Type.Value, payload: 'hey' },
+        { type: Type.Value, payload: 'ho' },
+        { type: Type.Value, payload: "let's" },
+        { type: Type.Value, payload: 'go' },
         { type: Type.End },
       ]);
     });
@@ -98,7 +98,7 @@ describe('OutputResponseQueue', () => {
         results.push(message);
       }
 
-      expect(results).toEqual([{ type: Type.InternalError, value: { message: 'The Error' } }]);
+      expect(results).toEqual([{ type: Type.InternalError, payload: { message: 'The Error' } }]);
     });
   });
 
@@ -119,7 +119,7 @@ describe('OutputResponseQueue', () => {
         results.push(message);
       }
 
-      expect(results).toEqual([{ type: Type.Anomaly, value: { message: 'The Anomaly', data: {} } }]);
+      expect(results).toEqual([{ type: Type.Anomaly, payload: { message: 'The Anomaly', data: {} } }]);
     });
   });
 

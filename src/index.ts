@@ -1,2 +1,4 @@
 export * from './AsyncQueue';
-export * from './ResponseQueue';
+export * from './InputResponseQueue';
+export * from './OutputResponseQueue';
+export * from './types';
