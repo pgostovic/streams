@@ -49,6 +49,14 @@ export class InputResponseQueue<T> {
     }
   }
 
+  public set maxSize(maxSize) {
+    this.q.maxSize = maxSize;
+  }
+
+  public get maxSize() {
+    return this.q.maxSize;
+  }
+
   public iterator() {
     return this.gen();
   }
@@ -77,6 +85,14 @@ export class InputResponseQueue<T> {
       case Type.End:
         throw FLUSH;
     }
+  }
+
+  public async dequeueAll(): Promise<T[]> {
+    const values: T[] = [];
+    for await (const value of this.iterator()) {
+      values.push(value);
+    }
+    return values;
   }
 }
 
@@ -110,8 +126,20 @@ export class OutputResponseQueue<T> {
     }
   }
 
+  public set maxSize(maxSize) {
+    this.q.maxSize = maxSize;
+  }
+
+  public get maxSize() {
+    return this.q.maxSize;
+  }
+
   public iterator() {
     return this.gen();
+  }
+
+  public async dequeue(): Promise<IMessage<T>> {
+    return this.q.dequeue();
   }
 
   public enqueue(value: T) {
@@ -121,10 +149,6 @@ export class OutputResponseQueue<T> {
   public flush() {
     this.q.enqueue({ type: Type.End });
     this.q.flush();
-  }
-
-  public async dequeue(): Promise<IMessage<T>> {
-    return this.q.dequeue();
   }
 }
 

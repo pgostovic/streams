@@ -4,6 +4,7 @@
  */
 
 export class AsyncQueue<T> {
+  public maxSize = 0;
   private gen = newQueueGenerator(this);
   private resolverQueue: Array<IResolver<T | undefined>> = [];
   private waitForEnqueue: IResolver<void> = newResolver<void>();
@@ -46,6 +47,10 @@ export class AsyncQueue<T> {
   }
 
   private enqueueVal(value?: T) {
+    if (this.maxSize > 0 && this.resolverQueue.length >= this.maxSize) {
+      throw new Error(`Cannot exceed maximum queue size (${this.maxSize})`);
+    }
+
     this.waitForEnqueue.resolve();
     this.waitForEnqueue = newResolver<void>();
     const resolver = newResolver<T | undefined>();

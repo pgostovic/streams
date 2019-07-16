@@ -122,4 +122,25 @@ describe('OutputResponseQueue', () => {
       expect(results).toEqual([{ type: Type.Anomaly, value: { message: 'The Anomaly', data: {} } }]);
     });
   });
+
+  describe('With maxSize set', () => {
+    it('should throw when enqueueing beyond maxSize', async () => {
+      const q = new OutputResponseQueue<string>();
+      q.maxSize = 4;
+
+      expect(q.maxSize).toBe(4);
+
+      q.enqueue('hey');
+      q.enqueue('ho');
+      q.enqueue("let's");
+      q.enqueue('go');
+
+      try {
+        q.enqueue('too far');
+        fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+  });
 });
