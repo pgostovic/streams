@@ -1,14 +1,40 @@
-/**
- * AsyncQueue
- *
- */
+export const FLUSH = new Error('flush');
+
+export const newQueueGenerator = <T>(q: { dequeue: () => Promise<T> }) =>
+  async function*() {
+    while (true) {
+      try {
+        yield await q.dequeue();
+      } catch (err) {
+        if (err === FLUSH) {
+          break;
+        } else {
+          throw err;
+        }
+      }
+    }
+  };
+
+const newResolver = <R>(): Resolver<R> => {
+  let r: ((value: R) => void) | undefined;
+  let rej: ((err: Error) => void) | undefined;
+  const p = new Promise<R>((resolve, reject) => {
+    r = resolve;
+    rej = reject;
+  });
+  return {
+    resolve: r as (value: R) => void,
+    reject: rej as (err: Error) => void,
+    promise: p,
+  };
+};
 
 export class AsyncQueue<T> {
   public maxSize = 0;
   public maxWaitTime = 0;
   private gen = newQueueGenerator(this);
-  private resolverQueue: Array<IResolver<T | undefined>> = [];
-  private waitForEnqueue: IResolver<void> = newResolver<void>();
+  private resolverQueue: Array<Resolver<T | undefined>> = [];
+  private waitForEnqueue: Resolver<void> = newResolver<void>();
 
   constructor(iter?: AsyncIterableIterator<T>) {
     if (iter) {
@@ -21,11 +47,11 @@ export class AsyncQueue<T> {
     }
   }
 
-  public enqueue(value: T) {
+  public enqueue(value: T): void {
     this.enqueueVal(value);
   }
 
-  public flush() {
+  public flush(): void {
     this.enqueueVal(undefined);
   }
 
@@ -59,7 +85,7 @@ export class AsyncQueue<T> {
     }
   }
 
-  private enqueueVal(value?: T) {
+  private enqueueVal(value?: T): void {
     if (this.maxSize > 0 && this.resolverQueue.length >= this.maxSize) {
       throw new Error(`Cannot exceed maximum queue size (${this.maxSize})`);
     }
@@ -72,38 +98,7 @@ export class AsyncQueue<T> {
   }
 }
 
-export const FLUSH = new Error('flush');
-
-export const newQueueGenerator = <T>(q: { dequeue: () => Promise<T> }) =>
-  async function*() {
-    while (true) {
-      try {
-        yield await q.dequeue();
-      } catch (err) {
-        if (err === FLUSH) {
-          break;
-        } else {
-          throw err;
-        }
-      }
-    }
-  };
-
-const newResolver = <R>(): IResolver<R> => {
-  let r: ((value: R) => void) | undefined;
-  let rej: ((err: Error) => void) | undefined;
-  const p = new Promise<R>((resolve, reject) => {
-    r = resolve;
-    rej = reject;
-  });
-  return {
-    resolve: r as (value: R) => void,
-    reject: rej as (err: Error) => void,
-    promise: p,
-  };
-};
-
-interface IResolver<T> {
+interface Resolver<T> {
   resolve: (value: T) => void;
   reject: (err: Error) => void;
   promise: Promise<T>;

@@ -1,5 +1,10 @@
 import { AsyncQueue } from '..';
 
+const wait = (millis = 0): Promise<void> =>
+  new Promise(resolve => {
+    setTimeout(resolve, millis);
+  });
+
 describe('AsyncQueue', () => {
   describe('Consuming via iterator', () => {
     describe('When values are enqueued before consumption', () => {
@@ -229,8 +234,3 @@ describe('AsyncQueue', () => {
     });
   });
 });
-
-const wait = (millis: number = 0) =>
-  new Promise(resolve => {
-    setTimeout(resolve, millis);
-  });
