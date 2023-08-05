@@ -55,7 +55,14 @@ export class AsyncQueue<T> {
     this.enqueueVal(undefined);
   }
 
+  /**
+   * @deprecated Use `for await (const value of queue) {}` instead
+   */
   public iterator(): AsyncIterableIterator<T> {
+    return this.gen();
+  }
+
+  [Symbol.asyncIterator](): AsyncIterableIterator<T> {
     return this.gen();
   }
 

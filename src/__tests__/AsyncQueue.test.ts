@@ -23,7 +23,7 @@ describe('AsyncQueue', () => {
           })(),
           (async () => {
             await wait(10);
-            for await (const value of q.iterator()) {
+            for await (const value of q) {
               results.push(value);
             }
           })(),
@@ -49,7 +49,7 @@ describe('AsyncQueue', () => {
             q.flush();
           })(),
           (async () => {
-            for await (const value of q.iterator()) {
+            for await (const value of q) {
               results.push(value);
             }
           })(),
@@ -83,11 +83,11 @@ describe('AsyncQueue', () => {
             is.flush();
           })(),
           (async () => {
-            for await (const value of is.iterator()) {
+            for await (const value of is) {
               results1.push(value);
             }
 
-            for await (const value of is.iterator()) {
+            for await (const value of is) {
               results2.push(value);
             }
           })(),
@@ -150,7 +150,7 @@ describe('AsyncQueue', () => {
           results.push(await q.dequeue());
           results.push(await q.dequeue());
 
-          for await (const value of q.iterator()) {
+          for await (const value of q) {
             results.push(value);
           }
         })(),
@@ -174,7 +174,7 @@ describe('AsyncQueue', () => {
 
       const results: string[] = [];
 
-      for await (const value of q.iterator()) {
+      for await (const value of q) {
         results.push(value);
       }
 
@@ -220,7 +220,7 @@ describe('AsyncQueue', () => {
         })(),
         (async () => {
           try {
-            for await (const value of q.iterator()) {
+            for await (const value of q) {
               results.push(value);
             }
             fail('Should have thrown');
