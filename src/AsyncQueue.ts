@@ -29,7 +29,7 @@ const newResolver = <R>(): Resolver<R> => {
   };
 };
 
-export class AsyncQueue<T> {
+export class AsyncQueue<T> implements AsyncIterable<T> {
   public maxSize = 0;
   public maxWaitTime = 0;
   private gen = newQueueGenerator(this);
@@ -62,7 +62,7 @@ export class AsyncQueue<T> {
     return this.gen();
   }
 
-  [Symbol.asyncIterator](): AsyncIterableIterator<T> {
+  [Symbol.asyncIterator](): AsyncIterator<T> {
     return this.gen();
   }
 
